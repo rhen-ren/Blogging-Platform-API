@@ -1,8 +1,11 @@
+import datetime
 from db import Base
-from posttags import post_tags
-from category import Category
+from model.posttags import post_tags
+from model.category import Category
+from model.tag import Tag
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
+from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -15,4 +18,6 @@ class Post(Base):
     content: Mapped[str] = mapped_column(String(200))
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
     category: Mapped["Category"] = relationship("Category", back_populates="post")
-    tags: Mapped[list["Tag"]] = relationship(secondary=post_tags, back_populates="post")
+    tags: Mapped[list["Tag"]] = relationship(secondary=post_tags, back_populates="posts")
+    createdAt: Mapped["datetime"] = mapped_column(DateTime, default=func.now())
+    updatedAt: Mapped["datetime"] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
