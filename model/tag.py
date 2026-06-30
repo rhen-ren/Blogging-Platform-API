@@ -9,4 +9,4 @@ class Tag(Base):
     __tablename__ = "tag"
     id: Mapped[int] = mapped_column(primary_key=True)
     tag_title: Mapped[str | None] = mapped_column(String(50))
-    posts: Mapped[list["Post"] | None] = relationship(secondary=post_tags, back_populates="tags")
+    posts: Mapped[list["Post"] | None] = relationship("PostTags", back_populates="tags")
