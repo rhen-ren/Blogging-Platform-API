@@ -15,5 +15,5 @@ def get_posts() -> CreatePost:
     return testData
 
 @router.post("/posts")
-def create_post(post: CreatePost, db: Session = Depends(run_db)) -> GetPost:
+def create_post(post: CreatePost, db: Session = Depends(run_db)):
     return blogpostservices.create_post(post, db)
