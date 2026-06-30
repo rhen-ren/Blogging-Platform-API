@@ -26,8 +26,7 @@ def create_post(post: CreatePost, db: Session):
                     tag_title = postTag
                 )
                 db.add(newTag)
-                db.commit()
-                db.refresh(newTag)
+                db.flush()
                 currentTagIds.append(newTag.id)
 
         #if categoryExist
@@ -40,8 +39,7 @@ def create_post(post: CreatePost, db: Session):
                     category_title = post.category
                 )
                 db.add(newCategory)
-                db.commit()
-                db.refresh(newCategory)
+                db.flush()
                 currentCategoryId = newCategory.id
             
         #create post
@@ -52,8 +50,7 @@ def create_post(post: CreatePost, db: Session):
         )
 
         db.add(newPost)
-        db.commit()
-        db.refresh(newPost)
+        db.flush()
 
         #create post tag link
         for tagId in currentTagIds:
