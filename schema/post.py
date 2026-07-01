@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class CreatePost(BaseModel):
     title: str
@@ -8,6 +9,9 @@ class CreatePost(BaseModel):
 
 class GetPost(BaseModel):
     id: int
+    title: str
     content: str
     category: str
-    category_id: int
+    tags: list[str]
+    createdAt: datetime
+    updatedAt: datetime
