@@ -11,8 +11,8 @@ from fastapi.responses import JSONResponse
 
 def create_post(post: CreatePost, db: Session):
     try:
-        category = db.execute(select(Category).where(Category.category_title == post.category)).scalar_one_or_none()
-        tags = db.execute(select(Tag).where(Tag.tag_title.in_(post.tags))).scalars().all()
+        category: Category = db.execute(select(Category).where(Category.category_title == post.category)).scalar_one_or_none()
+        tags: list[Tag] = db.execute(select(Tag).where(Tag.tag_title.in_(post.tags))).scalars().all()
 
         existingTagTitle: list = [tag.tag_title for tag in tags]
         currentTagIds: list = [tag.id for tag in tags]
@@ -122,6 +122,39 @@ def update_post(post: CreatePost, post_id: int, db:Session):
     except Exception as e:
         raise e
 
+def delete_post(post_id: int, db:Session):
+    try:
+        db.execute(delete(Post).where(Post.id == post_id))
+        db.commit()
+        
+        return JSONResponse(
+            status_code=204,
+            content={"message": "Success"}
+        )
+    except Exception as e:
+        raise e
 
+def get_all_posts(db: Session):
+    try:
 
+        posts: list[Post] = db.execute(select(Post)).scalars().all()
+        allPosts = []
+        if posts:
+            for post in posts:
+                currentCategory: Category = db.get(Category, post.id)
+                currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == post.id)).scalars.all()
+                currentTagsIds: list = [tagId.tag_id for tagId in currentTagsLinks]
+                currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars.all()
+                currentPost: GetPost = GetPost(
+                    id = post.id,
+                    title = post.title,
+                    content = post.content,
+                    category = currentCategory.category_title,
+                    tags = [tag.tag_title for tag in currentTags],
+                    createdAt= post.createdAt,
+                    updatedAt= post.updatedAt
+                )
 
+        return allPosts
+    except Exception as e:
+        raise e
