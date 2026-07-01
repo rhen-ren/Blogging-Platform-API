@@ -154,6 +154,7 @@ def get_all_posts(db: Session):
                     createdAt= post.createdAt,
                     updatedAt= post.updatedAt
                 )
+                allPosts.append(currentPost)
 
         return allPosts
     except Exception as e:
