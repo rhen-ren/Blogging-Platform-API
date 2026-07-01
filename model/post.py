@@ -18,6 +18,6 @@ class Post(Base):
     content: Mapped[str] = mapped_column(String(200))
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
     category: Mapped["Category"] = relationship("Category", back_populates="post")
-    post_tags: Mapped["PostTags"] = relationship("PostTags", back_populates= "post")
+    post_tags: Mapped["PostTags"] = relationship("PostTags", back_populates= "post", cascade="all, delete")
     createdAt: Mapped["datetime"] = mapped_column(DateTime, default=func.now())
     updatedAt: Mapped["datetime"] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
