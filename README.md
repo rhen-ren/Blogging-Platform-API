@@ -17,3 +17,5 @@ A simple blogging platform API built using FastAPI and SQLAlchemy
 - Tag: tag_id, tag_name
 - PostTag: post_id, tag_id
 <img width="911" height="152" alt="Blogging Platfrom ERD drawio" src="https://github.com/user-attachments/assets/b386d871-1086-48dd-b2cf-de81431569d0" />
+##Roadmap Project
+[Blogging Platform API Roadmap Project](https://roadmap.sh/projects/blogging-platform-api)
