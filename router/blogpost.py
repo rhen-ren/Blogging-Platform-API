@@ -17,3 +17,7 @@ def get_posts() -> CreatePost:
 @router.post("/posts")
 def create_post(post: CreatePost, db: Session = Depends(run_db)):
     return blogpostservices.create_post(post, db)
+
+@router.put("/posts/{post_id}")
+def create_post(post: CreatePost, post_id: int, db:Session = Depends(run_db)):
+    return blogpostservices.update_post(post, post_id, db)
