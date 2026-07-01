@@ -59,16 +59,28 @@ def create_post(post: CreatePost, db: Session):
                 tag_id = tagId
             )
             db.add(newLink)
-        db.commit()
+            db.flush()
 
-        return JSONResponse(
-            status_code=201,
-            content={"message": "Success"}
-        )
+        #returns the created post
+        category: Category = db.execute(select(Category).where(Category.id == newPost.category_id)).scalars().one_or_none()
+        currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == newPost.id)).scalars().all()
+        currentTagsIds: list = [tagId.tag_id for tagId in currentTagsLinks]
+        currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars().all()
+        currentPost: GetPost = GetPost(
+                    id = newPost.id,
+                    title = newPost.title,
+                    content = newPost.content,
+                    category = category.category_title,
+                    tags = [tag.tag_title for tag in currentTags],
+                    createdAt = newPost.createdAt,
+                    updatedAt = newPost.updatedAt
+                )
+        db.commit()
+        return currentPost
 
     except Exception as e:
         db.rollback()
-        raise e
+        raise HTTPException(status_code=400)
 
 def update_post(post: CreatePost, post_id: int, db:Session):
     try:
@@ -118,21 +130,62 @@ def update_post(post: CreatePost, post_id: int, db:Session):
                 tag_id = tagId
             )
             db.add(newLink)
+        
+        #returns the current post
+        post = db.execute(select(Post).where(Post.id == post_id)).scalars().one_or_none()
+        category: Category = db.execute(select(Category).where(Category.id == post.category_id)).scalars().one_or_none()
+        currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == post.id)).scalars().all()
+        currentTagsIds: list = [tagId.tag_id for tagId in currentTagsLinks]
+        currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars().all()
+        currentPost: GetPost = GetPost(
+                    id = post.id,
+                    title = post.title,
+                    content = post.content,
+                    category = category.category_title,
+                    tags = [tag.tag_title for tag in currentTags],
+                    createdAt = post.createdAt,
+                    updatedAt = post.updatedAt
+                )
+        
         db.commit()
+        return currentPost
+    
     except Exception as e:
-        raise e
+        raise HTTPException(status_code=400)
 
 def delete_post(post_id: int, db:Session):
     try:
-        db.execute(delete(Post).where(Post.id == post_id))
+        post: Post = db.execute(delete(Post).where(Post.id == post_id))
         db.commit()
         
+        
         return JSONResponse(
-            status_code=204,
-            content={"message": "Success"}
+            status_code=204
         )
     except Exception as e:
-        raise e
+        raise HTTPException(status_code=404, detail= "post not found")
+
+def get_post(post_id: int, db: Session):
+    try:
+        post = db.execute(select(Post).where(Post.id == post_id)).scalars().one_or_none()
+        category: Category = db.execute(select(Category).where(Category.id == post.category_id)).scalars().one_or_none()
+        currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == post.id)).scalars().all()
+        currentTagsIds: list = [tagId.tag_id for tagId in currentTagsLinks]
+        currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars().all()
+        currentPost: GetPost = GetPost(
+                    id = post.id,
+                    title = post.title,
+                    content = post.content,
+                    category = category.category_title,
+                    tags = [tag.tag_title for tag in currentTags],
+                    createdAt = post.createdAt,
+                    updatedAt = post.updatedAt
+                )
+       
+        
+        return currentPost
+    except Exception as e:
+        raise HTTPException(status_code=404, detail= "post not found")
 
 def get_all_posts(db: Session):
     try:
@@ -141,18 +194,18 @@ def get_all_posts(db: Session):
         allPosts = []
         if posts:
             for post in posts:
-                currentCategory: Category = db.get(Category, post.id)
-                currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == post.id)).scalars.all()
+                currentCategory: Category  = db.execute(select(Category).where(Category.id == post.category_id)).scalars().one_or_none()
+                currentTagsLinks: list[PostTags] = db.execute(select(PostTags).where(PostTags.post_id == post.id)).scalars().all()
                 currentTagsIds: list = [tagId.tag_id for tagId in currentTagsLinks]
-                currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars.all()
+                currentTags: list[Tag] = db.execute(select(Tag).where(Tag.id.in_(currentTagsIds))).scalars().all()
                 currentPost: GetPost = GetPost(
                     id = post.id,
                     title = post.title,
                     content = post.content,
                     category = currentCategory.category_title,
                     tags = [tag.tag_title for tag in currentTags],
-                    createdAt= post.createdAt,
-                    updatedAt= post.updatedAt
+                    createdAt = post.createdAt,
+                    updatedAt = post.updatedAt
                 )
                 allPosts.append(currentPost)
 
